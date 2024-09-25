@@ -17,11 +17,11 @@ buildscript {
 allprojects {
 
     ext {
-        appName = 'Shattered Pixel Dungeon'
-        appPackageName = 'com.shatteredpixel.shatteredpixeldungeon'
+        appName = 'Shattered Pixel Dungeon Mod'
+        appPackageName = 'com.oxtaly.shatteredpixeldungeonmod'
 
         appVersionCode = 797
-        appVersionName = '2.5.2'
+        appVersionName = '2.5.2-mod-5'
 
         appJavaCompatibility = JavaVersion.VERSION_1_8
 

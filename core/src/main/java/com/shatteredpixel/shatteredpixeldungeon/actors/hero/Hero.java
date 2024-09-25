@@ -33,38 +33,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.SacrificialFire;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AdrenalineSurge;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.HeroDisguise;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invulnerability;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ArtifactRecharge;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Awareness;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barkskin;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barrier;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Berserk;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Bless;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Charm;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Combo;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Drowsy;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Foresight;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.GreaterHaste;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.HoldFast;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hunger;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Levitation;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.LostInventory;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MindVision;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Momentum;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MonkEnergy;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Paralysis;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.PhysicalEmpower;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Recharging;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Regeneration;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.SnipersMark;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.TimeStasis;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Vertigo;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.*;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.duelist.Challenge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.duelist.ElementalStrike;
@@ -122,6 +91,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfFuror;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfHaste;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfMight;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfTenacity;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfWealth;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfMagicMapping;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfChallenge;
@@ -169,6 +139,7 @@ import com.watabou.noosa.audio.Sample;
 import com.watabou.noosa.tweeners.Delayer;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Callback;
+import com.watabou.utils.DeviceCompat;
 import com.watabou.utils.GameMath;
 import com.watabou.utils.PathFinder;
 import com.watabou.utils.Point;
@@ -177,6 +148,7 @@ import com.watabou.utils.Random;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.Objects;
 
 public class Hero extends Char {
 
@@ -1071,7 +1043,12 @@ public class Hero extends Char {
 						//TODO make all unique items important? or just POS / SOU?
 						boolean important = item.unique && item.isIdentified() &&
 								(item instanceof Scroll || item instanceof Potion);
-						if (important) {
+
+						// MOD:
+						if(DeviceCompat.isDebug() || (!Objects.isNull(RingOfWealth.DEBUG_TOGGLES.get(RingOfWealth.DT_SHOW_PICKUPS)) && RingOfWealth.DEBUG_TOGGLES.get(RingOfWealth.DT_SHOW_PICKUPS))) { // MOD:
+							GLog.d( Messages.capitalize(Messages.get(this, "you_now_have", String.format("%s (%s, lvl %s)", item.name(), item.trueName(), item.level()))) );
+						} // ENDMOD:
+						else if (important) {
 							GLog.p( Messages.capitalize(Messages.get(this, "you_now_have", item.name())) );
 						} else {
 							GLog.i( Messages.capitalize(Messages.get(this, "you_now_have", item.name())) );

@@ -28,7 +28,9 @@ import com.watabou.utils.Signal;
 public class GLog {
 
 	public static final String TAG = "GAME";
-	
+
+	public static final String DEBUG = "[DEBUG] ";
+
 	public static final String POSITIVE		= "++ ";
 	public static final String NEGATIVE		= "-- ";
 	public static final String WARNING		= "** ";
@@ -63,8 +65,12 @@ public class GLog {
 	public static void w( String text, Object... args ) {
 		i( WARNING + text, args );
 	}
-	
+
 	public static void h( String text, Object... args ) {
 		i( HIGHLIGHT + text, args );
+	}
+
+	public static void d( String text, Object... args ) {
+		i( DEBUG + text, args );
 	}
 }

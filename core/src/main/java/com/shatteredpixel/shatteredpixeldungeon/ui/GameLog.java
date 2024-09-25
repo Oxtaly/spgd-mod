@@ -135,6 +135,7 @@ public class GameLog extends Component implements Signal.Listener<String> {
 	private synchronized void recreateLines() {
 		for (Entry entry : entries) {
 			lastEntry = PixelScene.renderTextBlock( entry.text, 6 );
+			lastEntry.setHightlighting( false ); // MOD: fixes highlighting reenabling every new floors/recreations
 			lastEntry.hardlight( lastColor = entry.color );
 			add( lastEntry );
 		}
