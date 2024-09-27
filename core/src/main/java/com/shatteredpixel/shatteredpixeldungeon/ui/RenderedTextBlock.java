@@ -50,6 +50,9 @@ public class RenderedTextBlock extends Component {
 	private int hightlightColor = Window.TITLE_COLOR;
 	private boolean highlightingEnabled = true;
 
+	private int grayedColor = 0xD3D3D3; // MOD: used with §thingy§ like _thingy_ for hightlighting
+	private int hightlightedGrayed = 0xDFDFAC; // MOD: too lazy to blend colors, so hardcoded since only 2
+
 	public static final int LEFT_ALIGN = 1;
 	public static final int CENTER_ALIGN = 2;
 	public static final int RIGHT_ALIGN = 3;
@@ -115,18 +118,24 @@ public class RenderedTextBlock extends Component {
 		clear();
 		words = new ArrayList<>();
 		boolean highlighting = false;
+		boolean graying = false;
 		for (String str : tokens){
-			
+
 			if (str.equals("_") && highlightingEnabled){
 				highlighting = !highlighting;
+			}
+			else if (str.equals("§") && highlightingEnabled){
+				graying = !graying;
 			} else if (str.equals("\n")){
 				words.add(NEWLINE);
 			} else if (str.equals(" ")){
 				words.add(SPACE);
 			} else {
 				RenderedText word = new RenderedText(str, size);
-				
-				if (highlighting) word.hardlight(hightlightColor);
+
+				if(highlighting && graying) word.hardlight(hightlightedGrayed);
+				else if (highlighting) word.hardlight(hightlightColor);
+				else if (graying) word.hardlight(grayedColor);
 				else if (color != -1) word.hardlight(color);
 				word.scale.set(zoom);
 				

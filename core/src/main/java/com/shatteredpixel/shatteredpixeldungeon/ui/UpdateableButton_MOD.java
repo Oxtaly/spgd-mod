@@ -26,27 +26,39 @@ package com.shatteredpixel.shatteredpixeldungeon.ui;
 
 import com.shatteredpixel.shatteredpixeldungeon.Chrome;
 import com.watabou.noosa.Gizmo;
+import com.watabou.noosa.NinePatch;
 
 import java.util.function.Function;
 
 public class UpdateableButton_MOD extends StyledButton {
 
-    private Function<Button, String> getter;
+    private Function<Button, String> contentGetter;
+    private Function<Button, Chrome.Type> typeGetter;
     private String previousLabel;
+    private Chrome.Type previousType;
     private final static String TEMP_LABEL_BC_I_AM_LAZY = "t3mp";
 
-    public UpdateableButton_MOD(Function<Button, String> getter ) {
-        this( getter, 9 );
+    public UpdateableButton_MOD(Function<Button, String> contentGetter ) {
+        this( contentGetter, null );
+    }
+    public UpdateableButton_MOD(Function<Button, String> contentGetter, Function<Button, Chrome.Type> typeGetter ) {
+        this( contentGetter, typeGetter, 9 );
     }
 
-    public UpdateableButton_MOD(Function<Button, String> getter, int size ) {
-        this( Chrome.Type.RED_BUTTON, getter, size );
+    public UpdateableButton_MOD(Function<Button, String> contentGetter, int size ) {
+        this( Chrome.Type.RED_BUTTON, contentGetter, null, size );
+    }
+    
+    public UpdateableButton_MOD(Function<Button, String> contentGetter, Function<Button, Chrome.Type> typeGetter, int size ) {
+        this( Chrome.Type.RED_BUTTON, contentGetter, typeGetter, size );
     }
 
-    public UpdateableButton_MOD(Chrome.Type type, Function<Button, String> getter, int size ){
+    public UpdateableButton_MOD(Chrome.Type type, Function<Button, String> contentGetter, Function<Button, Chrome.Type> typeGetter, int size ){
         super( type, TEMP_LABEL_BC_I_AM_LAZY, size);
         previousLabel = TEMP_LABEL_BC_I_AM_LAZY;
-        this.getter = getter;
+        previousType = type;
+        this.contentGetter = contentGetter;
+        this.typeGetter = typeGetter;
         update();
     }
 
@@ -54,14 +66,31 @@ public class UpdateableButton_MOD extends StyledButton {
     public void update() {
         super.update();
 
-        String newLabel = getter.apply(this);
-        if(newLabel.equals(previousLabel)) { // Same as previous label, no need to update
+        String newLabel = contentGetter.apply(this);
+        Chrome.Type newType = typeGetter != null ? typeGetter.apply(this) : null;
+        if(newLabel.equals(previousLabel) && (typeGetter == null | (newType != null && newType.equals(previousType)))) { // Same as previous label & type, no need to update
             return;
         }
 
         for (int i=0; i < length; i++) {
             Gizmo gizmo = members.get( i );
-            if (gizmo != null && gizmo instanceof RenderedTextBlock) {
+            if(typeGetter != null
+                    && newType != null
+                    && !newType.equals(previousType)
+                    && gizmo != null
+                    && gizmo instanceof NinePatch
+            ) {
+                remove(gizmo);
+                i--;
+                bg = Chrome.get( newType );
+                addToBack( bg );
+                previousType = newType;
+                bg.update();
+                if(newLabel.equals(previousLabel)) {
+                    break;
+                }
+            }
+            if (!newLabel.equals(previousLabel) && gizmo != null && gizmo instanceof RenderedTextBlock) {
                 RenderedTextBlock textBlock = ((RenderedTextBlock) gizmo);
                 if(textBlock.text().equals(previousLabel)) {
                     textBlock.text(newLabel);

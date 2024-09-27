@@ -24,6 +24,7 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.windows;
 
+import com.shatteredpixel.shatteredpixeldungeon.Chrome;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -51,10 +52,18 @@ public class WndBtns_MOD extends Window {
     //only one MOD_WndBtns can appear at a time
     private static WndBtns_MOD INSTANCE;
 
+    public WndBtns_MOD(final Window owner, String title, String info,
+                       Map<String, BiConsumer<Hero, String>> actions,
+                       BiFunction<String, Hero, String> actionNameSupplier
+    ) {
+        this(owner, title, info, actions, actionNameSupplier, null);
+    }
     // Modified version of WndUseItem's consctructor method, very heavily copy pasted
     public WndBtns_MOD(final Window owner, String title, String info,
                        Map<String, BiConsumer<Hero, String>> actions,
-                       BiFunction<String, Hero, String> actionNameSupplier) {
+                       BiFunction<String, Hero, String> actionNameSupplier,
+                       BiFunction<String, Hero, Chrome.Type> buttonTypeSupplier
+    ) {
         super();
 
         if (INSTANCE != null){
@@ -73,7 +82,11 @@ public class WndBtns_MOD extends Window {
                 final BiConsumer<Hero, String> execute = entry.getValue();
                 final String action = entry.getKey();
 
-                UpdateableButton_MOD btn = new UpdateableButton_MOD( (Button b) -> actionNameSupplier.apply(action, Dungeon.hero), 8 ) {
+                UpdateableButton_MOD btn = new UpdateableButton_MOD(
+                        (Button b) -> actionNameSupplier.apply(action, Dungeon.hero),
+                        buttonTypeSupplier != null ? (Button b) -> buttonTypeSupplier.apply(action, Dungeon.hero) : null,
+                        8
+                ) {
                     @Override
                     protected void onClick() {
                         // hide();

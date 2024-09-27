@@ -22,6 +22,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.rings;
 
 import com.shatteredpixel.shatteredpixeldungeon.Challenges;
+import com.shatteredpixel.shatteredpixeldungeon.Chrome;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
@@ -42,7 +43,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfMet
 import com.shatteredpixel.shatteredpixeldungeon.items.spells.UnstableSpell;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfEnchantment;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ExoticCrystals;
-import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -129,8 +129,28 @@ public class RingOfWealth extends Ring {
 				for (String toggle : DEBUG_TOGGLES.keySet()) {
 					actions.put(toggle, this::execute);
 				}
-				actions.put(DT_TEST, this::execute);
-				WndBtns_MOD window = new WndBtns_MOD(null, "Debug Titles", "All the debug toggles", actions, this::actionName);
+				// actions.put(DT_TEST, this::execute);
+				WndBtns_MOD window = new WndBtns_MOD(
+						null,
+						"Debug Titles",
+						"All the debug toggles",
+						actions,
+						this::actionName,
+						(String actioned, Hero heroed) -> {
+							if (actioned.equals(DT_DROP_ARTIFACTS)) {
+								boolean hasArtifactsLeft = false;
+								for ( float prob : Generator.Category.ARTIFACT.probs ) {
+									if(Float.compare(prob, 0f) != 0) {
+										hasArtifactsLeft = true;
+										break;
+									}
+								}
+								if(!hasArtifactsLeft) {
+									return Chrome.Type.GREY_BUTTON;
+								}
+							}
+							return null;
+						});
 				GameScene.show(window);
 				return;
             case DT_DROP_ON_ALL:
@@ -173,7 +193,7 @@ public class RingOfWealth extends Ring {
 					!DEBUG_TOGGLES.get(DT_DROP_ARMORS) &&
 					!DEBUG_TOGGLES.get(DT_DROP_WANDS) &&
 					!DEBUG_TOGGLES.get(DT_DROP_RINGS)) {
-						GLog.w("You can't enable %s equips without a single equipment enabled!", action);
+						GLog.w("You can't enable %s without a single equipment enabled!", action);
 						return;
 					}
 					GLog.p("Toggled on %s", action);
@@ -181,10 +201,21 @@ public class RingOfWealth extends Ring {
 					if(action.equals(DT_DROP_ON_ALL)) {
 						triesToDrop = 1;
 					}
+					if(!DEBUG_TOGGLES.get(DT_DROP_CONSUMABLES)
+					&& (action.equals(DT_DROP_EQUIPS)
+					|| action.equals(DT_DROP_WEAPONS)
+					|| action.equals(DT_DROP_ARTIFACTS)
+					|| action.equals(DT_DROP_ARMORS)
+					|| action.equals(DT_DROP_WANDS)
+					|| action.equals(DT_DROP_RINGS))) {
+						dropsToRare = 0;
+					}
 				}
+				return;
 			case DT_TEST:
 				GLog.p("Showcase TEST_LINE");
 				GLog.n("Showcase TEST_LINE");
+				return;
         }
     }
 
@@ -203,11 +234,25 @@ public class RingOfWealth extends Ring {
 			case DT_DROP_ARMORS:
 				if(str == null) str = "DROP ARMORS";
 			case DT_DROP_ARTIFACTS:
-				if(str == null) str = "DROP ARTIFACTS";
+				if(str == null) {
+					str = "DROP ARTIFACTS";
+					// boolean hasArtifactsLeft = false;
+					// for ( float prob : Generator.Category.ARTIFACT.probs ) {
+					// 	if(Float.compare(prob, 0f) != 0) {
+					// 		hasArtifactsLeft = true;
+					// 		break;
+					// 	}
+					// }
+					// if(!hasArtifactsLeft) {
+					// 	str = "§" + str + "§";
+ 					// }
+				}
 			case DT_DROP_RINGS:
 				if(str == null) str = "DROP RINGS";
 			case DT_DROP_WANDS:
 				if(str == null) str = "DROP WANDS";
+			case DT_TEST:
+				if(str == null) str = "!TEST!";
 			case DT_DROP_WEAPONS:
 				if(str == null) str = "DROP WEAPONS";
 			case AC_SHOW_DEBUG_TOGGLES:
@@ -289,11 +334,11 @@ public class RingOfWealth extends Ring {
 		// MOD:
 		// Disables drops early on if neither equips or consumables are enabled
 		if(!DEBUG_TOGGLES.get(DT_DROP_EQUIPS) && !DEBUG_TOGGLES.get(DT_DROP_CONSUMABLES)) {
-			GLog.d("No drops!");
-			GLog.newLine();
-			GLog.d("DT_DROP_CONSUMABLES %s", DEBUG_TOGGLES.get(DT_DROP_CONSUMABLES));
-			GLog.newLine();
-			GLog.d("DT_DROP_EQUIPS %s", DEBUG_TOGGLES.get(DT_DROP_EQUIPS));
+			// GLog.d("No drops!");
+			// GLog.newLine();
+			// GLog.d("DT_DROP_CONSUMABLES %s", DEBUG_TOGGLES.get(DT_DROP_CONSUMABLES));
+			// GLog.newLine();
+			// GLog.d("DT_DROP_EQUIPS %s", DEBUG_TOGGLES.get(DT_DROP_EQUIPS));
 			return null;
 		}
 
@@ -333,7 +378,7 @@ public class RingOfWealth extends Ring {
 				Item i;
 				do {
 					i = genEquipmentDrop(equipBonus - 1);
-				} while (Challenges.isItemBlocked(i) || isItemBlockedByDebug(i)); // MOD:
+				} while (Challenges.isItemBlocked(i));
 				drops.add(i);
 				if(DeviceCompat.isDebug()) { // MOD:
 					GLog.d(String.format("Ring of Wealth: Item %s (%s) level %s", i.name(), i.trueName(), i.level()));
@@ -464,55 +509,64 @@ public class RingOfWealth extends Ring {
 		}
 	}
 
-	// MOD:
-	// Make sure the item generated isn't disabled by the debug toggles
-	private static Boolean isItemBlockedByDebug(Item item) {
-		if(!DEBUG_TOGGLES.get(DT_DROP_WEAPONS) && item instanceof Weapon) {
-			return true;
-		}
-		if(!DEBUG_TOGGLES.get(DT_DROP_RINGS) && item instanceof Ring) {
-			return true;
-		}
-		if(!DEBUG_TOGGLES.get(DT_DROP_ARMORS) && item instanceof Armor) {
-			return true;
-		}
-		if(!DEBUG_TOGGLES.get(DT_DROP_WANDS) && item instanceof Wand) {
-			return true;
-		}
-		return false;
+	private static enum EquipmentDropTypes { // MOD:
+ 		WEAPON,
+		ARMOR,
+		RING,
+		ARTIFACT,
+		WAND
 	}
 
+	// MOD: changes the way the items are generated to be able
+	// to be toggled off easier
 	private static Item genEquipmentDrop( int level ){
-		Item result;
 		//each upgrade increases depth used for calculating drops by 1
+		ArrayList<EquipmentDropTypes> types = new ArrayList<>();
+
+		if(DEBUG_TOGGLES.get(DT_DROP_WEAPONS)) types.add(EquipmentDropTypes.WEAPON);
+		if(DEBUG_TOGGLES.get(DT_DROP_WEAPONS)) types.add(EquipmentDropTypes.WEAPON);
+
+		if(DEBUG_TOGGLES.get(DT_DROP_ARMORS)) types.add(EquipmentDropTypes.ARMOR);
+
+		if(DEBUG_TOGGLES.get(DT_DROP_RINGS)) types.add(EquipmentDropTypes.RING);
+
+		if(DEBUG_TOGGLES.get(DT_DROP_ARTIFACTS)) types.add(EquipmentDropTypes.ARTIFACT);
+
+		if(DEBUG_TOGGLES.get(DT_DROP_WANDS)) types.add(EquipmentDropTypes.WAND);
+
+		if(types.isEmpty()) { // Should never happen, but just in case
+			return genConsumableDrop(level);
+		}
+		return genEquipmentDrop(level, types);
+	}
+
+	private static Item genEquipmentDrop( int level, ArrayList<EquipmentDropTypes> types ) {
+		Item result;
+
 		int floorset = (Dungeon.depth + level)/5;
-		switch (Random.Int(6)) { // MOD:
-			default: case 0: case 1:
+
+		EquipmentDropTypes type = types.get(Random.Int(0, types.size() - 1));
+
+		switch (type) { // MOD:
+			default: case WEAPON:
 				Weapon w = Generator.randomWeapon(floorset, true);
 				if (!w.hasGoodEnchant() && Random.Int(10) < level)      w.enchant();
 				else if (w.hasCurseEnchant())                           w.enchant(null);
 				result = w;
 				break;
-			case 2:
+			case ARMOR:
 				Armor a = Generator.randomArmor(floorset);
 				if (!a.hasGoodGlyph() && Random.Int(10) < level)        a.inscribe();
 				else if (a.hasCurseGlyph())                             a.inscribe(null);
 				result = a;
 				break;
-			case 3:
+			case RING:
 				result = Generator.randomUsingDefaults(Generator.Category.RING);
 				break;
-			case 4:
-				// MOD:
-				// Disables artifacts if is disabled by the debug toggles, different
-				// method than isItemBlockedByDEBUG since artifacts are limited in generation.
-				if(!DEBUG_TOGGLES.get(DT_DROP_ARTIFACTS)) {
-					result = genEquipmentDrop(level);
-					break;
-				}
+			case ARTIFACT:
 				result = Generator.random(Generator.Category.ARTIFACT);
 				break;
-			case 5: // MOD: added wands to ring of wealth
+			case WAND: // MOD: added wands to ring of wealth
 				result = Generator.randomUsingDefaults(Generator.Category.WAND);
 				break;
 		}
