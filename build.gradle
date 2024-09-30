@@ -21,7 +21,7 @@ allprojects {
         appPackageName = 'com.oxtaly.shatteredpixeldungeonmod'
 
         appVersionCode = 797
-        appVersionName = '2.5.2-mod-6'
+        appVersionName = '2.5.2-mod-7'
 
         appJavaCompatibility = JavaVersion.VERSION_1_8
 

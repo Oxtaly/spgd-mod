@@ -194,6 +194,11 @@ public class ChaliceOfBlood extends Artifact {
 				desc += Messages.get(this, "desc_2");
 			else
 				desc += Messages.get(this, "desc_3");
+
+			// MOD:
+			if(level() < levelCap) {
+				desc += "\n\n" + "Next prick damage will be: _" + Messages.decimalFormat("#.##", 5 + 3*(level()*level())) + "_";
+			}
 		}
 
 		return desc;

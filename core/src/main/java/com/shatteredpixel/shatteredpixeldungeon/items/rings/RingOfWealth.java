@@ -56,8 +56,11 @@ import com.watabou.utils.Random;
 import com.watabou.utils.Reflection;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.function.BiConsumer;
 
 public class RingOfWealth extends Ring {
@@ -517,22 +520,26 @@ public class RingOfWealth extends Ring {
 		WAND
 	}
 
+	private static final List<EquipmentDropTypes> DEFAULT_EQUIPMENT_DROP_LIST = Arrays.asList(
+			EquipmentDropTypes.WEAPON,
+			EquipmentDropTypes.WEAPON,
+			EquipmentDropTypes.ARMOR,
+			EquipmentDropTypes.RING,
+			EquipmentDropTypes.ARTIFACT,
+			EquipmentDropTypes.WAND
+	);
+
 	// MOD: changes the way the items are generated to be able
 	// to be toggled off easier
 	private static Item genEquipmentDrop( int level ){
 		//each upgrade increases depth used for calculating drops by 1
-		ArrayList<EquipmentDropTypes> types = new ArrayList<>();
+		ArrayList<EquipmentDropTypes> types = new ArrayList<>(DEFAULT_EQUIPMENT_DROP_LIST);
 
-		if(DEBUG_TOGGLES.get(DT_DROP_WEAPONS)) types.add(EquipmentDropTypes.WEAPON);
-		if(DEBUG_TOGGLES.get(DT_DROP_WEAPONS)) types.add(EquipmentDropTypes.WEAPON);
-
-		if(DEBUG_TOGGLES.get(DT_DROP_ARMORS)) types.add(EquipmentDropTypes.ARMOR);
-
-		if(DEBUG_TOGGLES.get(DT_DROP_RINGS)) types.add(EquipmentDropTypes.RING);
-
-		if(DEBUG_TOGGLES.get(DT_DROP_ARTIFACTS)) types.add(EquipmentDropTypes.ARTIFACT);
-
-		if(DEBUG_TOGGLES.get(DT_DROP_WANDS)) types.add(EquipmentDropTypes.WAND);
+		if(!DEBUG_TOGGLES.get(DT_DROP_WEAPONS)) types.removeAll(Collections.singleton(EquipmentDropTypes.WEAPON));
+		if(!DEBUG_TOGGLES.get(DT_DROP_ARMORS)) types.remove(EquipmentDropTypes.ARMOR);
+		if(!DEBUG_TOGGLES.get(DT_DROP_RINGS)) types.remove(EquipmentDropTypes.RING);
+		if(!DEBUG_TOGGLES.get(DT_DROP_ARTIFACTS)) types.remove(EquipmentDropTypes.ARTIFACT);
+		if(!DEBUG_TOGGLES.get(DT_DROP_WANDS)) types.remove(EquipmentDropTypes.WAND);
 
 		if(types.isEmpty()) { // Should never happen, but just in case
 			return genConsumableDrop(level);
